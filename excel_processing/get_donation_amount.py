@@ -10,6 +10,7 @@ FUND_URL = "https://www.justgiving.com/fundraising/"
 excel_loc = "excel_examples/Example.xlsx"
 
 
+
 class DonationGetter:
     def __init__(self, app_id, headers, api_url, fund_url):
         self.app_id = app_id

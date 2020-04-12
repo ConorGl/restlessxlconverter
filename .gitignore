@@ -1,1 +1,6 @@
 vrestless/
+*.py[cod]
+env/
+.idea/
+db.sqlite3
+.sass-cache

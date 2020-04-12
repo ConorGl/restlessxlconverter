@@ -1,0 +1,11 @@
+<div class="row justify-content-center">
+  <div class="" id="main-form">
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" id="form-submit" value="Submit" class="btn btn-secondary"/>
+    </form>
+
+  </div>
+</div>
