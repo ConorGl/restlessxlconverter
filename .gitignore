@@ -3,4 +3,5 @@ vrestless/
 env/
 .idea/
 db.sqlite3
+venv/
 .sass-cache
