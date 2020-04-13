@@ -13,9 +13,7 @@ class DonationGetter:
 
     def process_workbook(self, workbook):
         for sheet in workbook:
-            if sheet.title == "Summary":
-                continue
-            else:
+            if sheet.title == "Raw data - registered":
                 for index, row in enumerate(sheet.iter_rows(min_row=2), start=2):
                     row_shortname = self._get_shortname(row)
                     r_code = self._check_page_exists(row_shortname)

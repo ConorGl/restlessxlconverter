@@ -17,6 +17,10 @@ from django.urls import path
 
 from main.views import dashboard
 
+def trigger_error(request):
+    divison_by_zero = 1/0
+
 urlpatterns = [
-    path('', dashboard, name='dashboard')
+    path('', dashboard, name='dashboard'),
+    path('sentry-debug/', trigger_error),
 ]

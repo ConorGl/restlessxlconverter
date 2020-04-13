@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-import mimetypes
+
 import openpyxl
 from main.get_donation_amount import DonationGetter
 
