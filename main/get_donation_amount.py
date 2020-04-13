@@ -1,3 +1,5 @@
+from tempfile import NamedTemporaryFile
+
 import requests
 import json
 import openpyxl
@@ -22,7 +24,7 @@ class DonationGetter:
                         row[12].value = donation_amount
                     else:
                         print("page doesn't exist")
-        return workbook
+        return self._save_as_stream(workbook)
 
     def _check_page_exists(self, shortname):
         head_r = requests.head(
@@ -45,3 +47,11 @@ class DonationGetter:
     def _get_shortname(self, row):
         shortname = row[11].value.replace(self.fund_url, "")
         return shortname
+
+    def _save_as_stream(self, workbook):
+        with NamedTemporaryFile() as tmp:
+            workbook.save(tmp.name)
+            tmp.seek(0)
+            stream = tmp.read()
+            tmp.close()
+        return stream

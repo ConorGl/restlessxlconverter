@@ -15,10 +15,8 @@ Including another URLconf
 """
 from django.urls import path
 
-from main.views import dashboard, dashboard2
+from main.views import dashboard
 
 urlpatterns = [
-    path('', dashboard, name='dashboard'),
-    path("numbers2/", dashboard2, name='dashboard2'),
-    path("numbers2/", dashboard2, name='dashboard2')
+    path('', dashboard, name='dashboard')
 ]
