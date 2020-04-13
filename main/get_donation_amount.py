@@ -15,11 +15,11 @@ class DonationGetter:
         for sheet in workbook:
             if sheet.title == "Raw data - registered":
                 for index, row in enumerate(sheet.iter_rows(min_row=2), start=2):
-                    row_shortname = self._get_shortname(row)
-                    r_code = self._check_page_exists(row_shortname)
-                    if r_code == 200:
-                        donation_amount = self._get_donation_amount(row_shortname)
-                        row[12].value = donation_amount
+                    if row[11]:
+                        row_shortname = self._get_shortname(row)
+                        if self._check_page_exists(row_shortname) == 200:
+                            donation_amount = self._get_donation_amount(row_shortname)
+                            row[12].value = donation_amount
                     else:
                         print("page doesn't exist")
         return self._save_as_stream(workbook)
