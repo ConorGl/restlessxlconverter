@@ -17,6 +17,7 @@ class DonationGetter:
                 for index, row in enumerate(sheet.iter_rows(min_row=2), start=2):
                     if row[11].value:
                         row_shortname = self._get_shortname(row)
+                        .   `
                         if self._check_page_exists(row_shortname) == 200:
                             donation_amount = self._get_donation_amount(row_shortname)
                             row[12].value = donation_amount
