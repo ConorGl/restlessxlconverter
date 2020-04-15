@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, include
 
 from main.views import dashboard
 
@@ -23,4 +23,5 @@ def trigger_error(request):
 urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('sentry-debug/', trigger_error),
+    path('django-rq/', include('django_rq.urls')),
 ]
