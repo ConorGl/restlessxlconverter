@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from urllib.parse import urlparse
+
 import django_heroku
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_rq',
 ]
 
 MIDDLEWARE = [
@@ -128,5 +131,26 @@ sentry_sdk.init(
         integrations=[DjangoIntegration()],
         send_default_pii=True
 )
+# =======================
+#   Redis and RQ
+# =======================
+redis_url = urlparse(os.getenv('REDISCLOUD_URL', 'redis://localhost:6379'))
+redis_db = os.getenv('REDIS_DB', '0')
+redis_connections = int(os.getenv('REDIS_CONNECTIONS', '50'))
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://{redis_url.hostname}:{redis_url.port}/{redis_db}',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': redis_url.password,
+            'CONNECTION_POOL_KWARGS': {'max_connections': redis_connections},
+        },
+    }
+}
+
+RQ_QUEUES = {
+    'default': {'USE_REDIS_CACHE': 'default'},
+}
 
 django_heroku.settings(locals())
