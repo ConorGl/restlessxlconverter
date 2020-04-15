@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from urllib.parse import urlparse
+
 import django_heroku
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -129,34 +131,26 @@ sentry_sdk.init(
         integrations=[DjangoIntegration()],
         send_default_pii=True
 )
+# =======================
+#   Redis and RQ
+# =======================
+redis_url = urlparse(os.getenv('REDISCLOUD_URL', 'redis://localhost:6379'))
+redis_db = os.getenv('REDIS_DB', '0')
+redis_connections = int(os.getenv('REDIS_CONNECTIONS', '50'))
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://{redis_url.hostname}:{redis_url.port}/{redis_db}',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': redis_url.password,
+            'CONNECTION_POOL_KWARGS': {'max_connections': redis_connections},
+        },
+    }
+}
 
 RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 8000,
-        'DB': 0,
-        'PASSWORD': 'some-password',
-        'DEFAULT_TIMEOUT': 360,
-    },
-    'with-sentinel': {
-        'SENTINELS': [('localhost', 26736), ('localhost', 26737)],
-        'MASTER_NAME': 'redismaster',
-        'DB': 0,
-        'PASSWORD': 'secret',
-        'SOCKET_TIMEOUT': None,
-        'CONNECTION_KWARGS': {
-            'socket_connect_timeout': 0.3
-        },
-    },
-    'high': {
-        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'), # If you're on Heroku
-        'DEFAULT_TIMEOUT': 500,
-    },
-    'low': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-    }
+    'default': {'USE_REDIS_CACHE': 'default'},
 }
 
 django_heroku.settings(locals())
