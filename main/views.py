@@ -35,22 +35,25 @@ class GenerateExport(FormView):
     form_class = NameSubmitForm
     success_url = reverse_lazy('dashboard')
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.job_status = ''
+
     def dispatch(self, request, *args, **kwargs):
         job_id = self.request.GET.get('j')
-        if not job_id:
-            return context
-        job = Job.fetch(job_id, connection=redis_conn)
-        if job.get_status() == 'ongoing':
-            # Show loading
-            self.job_status = 'ongoing'
-            pass
-        elif job.get_status() == 'finished':
-            streamed_workbook, filename = job.return_value
-            response = HttpResponse(content=streamed_workbook, content_type='application/ms-excel')
-            response['Content-Disposition'] = "attachment; filename={}".format(filename)
-            return response
-        # elif job.get_status() == TrackedJobStatus.FAILED:
-        #    print("Why though?")
+        if job_id:
+            job = Job.fetch(job_id, connection=redis_conn)
+            if job.get_status() == 'ongoing':
+                # Show loading
+                self.job_status = 'ongoing'
+                pass
+            elif job.get_status() == 'finished':
+                streamed_workbook, filename = job.return_value
+                response = HttpResponse(content=streamed_workbook, content_type='application/ms-excel')
+                response['Content-Disposition'] = "attachment; filename={}".format(filename)
+                return response
+            # elif job.get_status() == TrackedJobStatus.FAILED:
+            #    print("Why though?")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
