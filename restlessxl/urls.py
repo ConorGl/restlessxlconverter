@@ -15,14 +15,14 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from main.views import dashboard
+from main.views import dashboard, processing
 
 def trigger_error(request):
     divison_by_zero = 1/0
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
-    path('processing/', dashboard, name='processing'),
+    path('processing/', processing, name='processing'),
     path('sentry-debug/', trigger_error),
     path('django-rq/', include('django_rq.urls')),
 ]

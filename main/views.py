@@ -39,27 +39,10 @@ class GenerateExport(FormView):
         super().__init__(**kwargs)
         self.job_status = ''
 
-    def dispatch(self, request, *args, **kwargs):
-        job_id = self.request.GET.get('j')
-        if job_id:
-            job = Job.fetch(job_id, connection=redis_conn)
-            if job.get_status() == 'ongoing':
-                # Show loading
-                self.job_status = 'ongoing'
-                pass
-            elif job.get_status() == 'finished':
-                streamed_workbook, filename = job.return_value
-                response = HttpResponse(content=streamed_workbook, content_type='application/ms-excel')
-                response['Content-Disposition'] = "attachment; filename={}".format(filename)
-                return response
-            # elif job.get_status() == TrackedJobStatus.FAILED:
-            #    print("Why though?")
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
         job_id = str(uuid.uuid4())
         django_rq.enqueue(generate_file, form.files['file'], job_id=job_id)
-        return redirect(f'/success?j={job_id}')
+        return redirect(f'/processing?j={job_id}')
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(job_status=self.job_status, **kwargs)
@@ -91,11 +74,6 @@ class GenerateExportPro(FormView):
             #    print("Why though?")
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        job_id = str(uuid.uuid4())
-        django_rq.enqueue(generate_file, form.files['file'], job_id=job_id)
-        return redirect(f'/processing?j={job_id}')
-
     def get_context_data(self, **kwargs):
         return super().get_context_data(job_status=self.job_status, **kwargs)
 
@@ -116,5 +94,5 @@ class GenerateExportPro(FormView):
 #
 
 dashboard = GenerateExport.as_view()
-dashboard = GenerateExportPro.as_view()
+processing = GenerateExportPro.as_view()
 
