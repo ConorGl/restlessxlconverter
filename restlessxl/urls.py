@@ -22,6 +22,7 @@ def trigger_error(request):
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
+    path('processing/', dashboard, name='processing'),
     path('sentry-debug/', trigger_error),
     path('django-rq/', include('django_rq.urls')),
 ]

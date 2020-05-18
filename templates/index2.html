@@ -1,6 +1,35 @@
-<html>
-<body text="green">
-<h1>Hello world!</h1>
-<p><a href="https://www.w3schools.com">Visit W3Schools.com!</a></p>
+<!DOCTYPE html>
+<html xmlns:background-image="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Restless Excel Converter</title>
+</head>
+<body>
+
+<img src="https://restlessdevelopment.org/content/themes/restless/images/logo-new.png">
+<h1>Hello Restless Friends!</h1>
+<p>Here is a simple web app for you to get values in to your excel spreadsheets.
+For now, it's super simple - all you need to do is submit the file in the box
+which will then fill in the columns and return it back to you as a download.</p>
+
+<div class="row justify-content-center">
+  <div class="" id="main-form">
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" id="form-submit" value="Submit" class="btn btn-secondary"/>
+    </form>
+
+  </div>
+</div>
 </body>
+
+<script>
+    setTimeout(
+        function(){
+            location.reload();
+            },10000);
+</script>
+
+
 </html>
