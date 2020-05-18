@@ -12,11 +12,13 @@ class DonationGetter:
         self.api_url = api_url
 
     def process_workbook(self, workbook):
+        print("Starting")
         for sheet in workbook:
             if sheet.title == "Raw data - registered":
                 for index, row in enumerate(sheet.iter_rows(min_row=2), start=2):
                     if row[11].value:
                         row_shortname = self._get_shortname(row)
+                        print(row_shortname)
                         if self._check_page_exists(row_shortname) == 200:
                             donation_amount = self._get_donation_amount(row_shortname)
                             row[12].value = donation_amount

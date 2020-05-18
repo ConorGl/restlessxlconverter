@@ -24,8 +24,11 @@ class NameSubmitForm(forms.Form):
 
 
 def generate_file(form_file):
+    print("Generating file")
     filename = form_file._get_name()
+    print(filename)
     workbook = openpyxl.load_workbook(form_file.open())
+    print("Opening file")
     restless_getter = DonationGetter(APP_ID, HEADERS, API_URL, FUND_URL)
     streamed_workbook = restless_getter.process_workbook(workbook)
     return streamed_workbook, filename
@@ -41,7 +44,9 @@ class GenerateExport(FormView):
 
     def form_valid(self, form):
         job_id = str(uuid.uuid4())
+        print("enqueuing file")
         django_rq.enqueue(generate_file, form.files['file'], job_id=job_id)
+        print("file enqueued")
         return redirect(f'/processing?j={job_id}')
 
     def get_context_data(self, **kwargs):
@@ -66,6 +71,7 @@ class GenerateExportPro(FormView):
                 self.job_status = 'ongoing'
                 pass
             elif job.get_status() == 'finished':
+                print("Job Finished")
                 streamed_workbook, filename = job.return_value
                 response = HttpResponse(content=streamed_workbook, content_type='application/ms-excel')
                 response['Content-Disposition'] = "attachment; filename={}".format(filename)
