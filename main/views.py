@@ -8,6 +8,7 @@ import uuid
 import boto3
 import openpyxl
 import requests
+import os
 from rq.job import Job
 
 from main.get_donation_amount import DonationGetter
@@ -40,11 +41,11 @@ def generate_file(filename):
 def save_file_get_url(form_file):
     client = boto3.client(
         's3',
-        aws_access_key_id=settings.AWS_ACCESS_KEY,
-        aws_secret_access_key=settings.AWS_ACCESS_KEY,
+        aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
+        aws_secret_access_key=os.environ['AWS_SECRET_KEY'],
         region_name='eu-west-2'
     )
-    kwargs = dict(Bucket=settings.BUCKET, Key=form_file.name)
+    kwargs = dict(Bucket=os.environ['BUCKET'], Key=form_file.name)
     client.upload_fileobj(Fileobj=form_file.open(), **kwargs)
     url = client.generate_presigned_url('get_object', Params=kwargs, ExpiresIn=600)
     return url
