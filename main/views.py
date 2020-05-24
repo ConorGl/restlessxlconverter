@@ -5,8 +5,9 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView
 import django_rq
 import uuid
-
+import boto3
 import openpyxl
+import requests
 from rq.job import Job
 
 from main.get_donation_amount import DonationGetter
@@ -22,16 +23,31 @@ redis_conn = django_rq.get_connection()
 class NameSubmitForm(forms.Form):
     file = forms.FileField(label="Submit your file")
 
+def process_file(file):
+    url = save_file_get_url(file)
+    response = requests.get(url)
+    filename = file._get_name()
+    with open('/tmp/{}'.format(filename), 'wb') as temp_file:
+        temp_file.write(response.content)
+    return generate_file(filename)
 
-def generate_file(form_file):
-    print("Generating file")
-    filename = form_file._get_name()
-    print(filename)
-    workbook = openpyxl.load_workbook(form_file.open())
-    print("Opening file")
+def generate_file(filename):
+    workbook = openpyxl.load_workbook('/tmp/{}'.format(filename))
     restless_getter = DonationGetter(APP_ID, HEADERS, API_URL, FUND_URL)
     streamed_workbook = restless_getter.process_workbook(workbook)
     return streamed_workbook, filename
+
+def save_file_get_url(form_file):
+    client = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY,
+        aws_secret_access_key=settings.AWS_ACCESS_KEY,
+        region_name='eu-west-2'
+    )
+    kwargs = dict(Bucket=settings.BUCKET, Key=form_file.name)
+    client.upload_fileobj(Fileobj=form_file.open(), **kwargs)
+    url = client.generate_presigned_url('get_object', Params=kwargs, ExpiresIn=600)
+    return url
 
 class GenerateExport(FormView):
     template_name = 'index.html'
@@ -45,7 +61,7 @@ class GenerateExport(FormView):
     def form_valid(self, form):
         job_id = str(uuid.uuid4())
         print("enqueuing file")
-        django_rq.enqueue(generate_file, form.files['file'], job_id=job_id)
+        django_rq.enqueue(process_file, form.files['file'], job_id=job_id)
         print("file enqueued")
         return redirect(f'/processing?j={job_id}')
 
